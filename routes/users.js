@@ -1,15 +1,19 @@
 var express = require('express');
 var router = express.Router();
 const User = require('../Models/User');
+var constants=require('../config/constants');
 const bcrypt = require('bcryptjs');
 const passport = require('passport');
+const jwt=require('jsonwebtoken');
+
 
 /* GET users listing. */
 // router.get('/login', function(req, res, next) {
 //   res.json({message:'respond with a resource'});
 // });
+
+
 router.post('/signup',(req,res)=>{
-  // console.log("Request is: ",req.body.firstName);
   User.findOne({
     email:req.body.email
   }).then(user=>{
@@ -35,10 +39,28 @@ router.post('/signup',(req,res)=>{
     });
   });
 });
+
+
 router.post('/login',function(req,res,next){
-  passport.authenticate('local')(req,res,next);
-  res.status(200);
-  return res.json({message:"Succesfull"});
+  passport.authenticate('local',{session:false},(err,user,info)=>{
+    if(err||!user){
+      return res.status(400).json({
+        message:"Could not authenticate user",
+        user:user
+      });
+    }
+
+    req.login(user,{session:false}, (err)=>{
+      if(err){
+        res.send(err);
+      }
+
+      const token=jwt.sign(user,constants.SECRET_KEY);
+      return res.json({user,token,isAuthenticated:true});
+    });
+  })(req,res);
+  // res.status(200);
+  // return res.json({message:"Succesfull"});
 });
 
 module.exports = router;

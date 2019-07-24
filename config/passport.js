@@ -19,7 +19,7 @@ passport.use(new LocalStrategy({
                 throw err;
             }
             if(isaMatch){
-                return done(null,{user:user,isAuthenticated:true});
+                return done(null,{user});
             }
             else{
                 return done(null,false,{message:"Incorrect username or password"});
@@ -30,13 +30,11 @@ passport.use(new LocalStrategy({
 ));
 
 passport.serializeUser(function (user, done) {
-    console.log("User is: ",user);
     return done(null, user.id);
   });
   
   passport.deserializeUser(function (id, done) {
-    User
-      .findById(id, function (err, user) {
+    User.findById(id, function (err, user) {
         return done(err, user);
       });
   });
