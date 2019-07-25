@@ -174,7 +174,7 @@ router.post('/bio',function(req,res){
             profile.user=user.id;
             profile.save(function(err,profile){
                 if(err){
-                    return res.json({message:"Something went wrong while saving to database, try again later"}); 
+                    return res.status(500).json({message:"Something went wrong while saving to database, try again later"}); 
                 }
                 let skl=[...bio.skill];
                 for(i=0;i<req.body.skill.length();i++)
@@ -186,40 +186,50 @@ router.post('/bio',function(req,res){
                     user:user.id,
                     profilePicture:profile.id
                 });
-                return res.json({messge:"Saved Bio succesfully",newBio}); 
+                newBio.save().then( (bio) => {
+                    return res.json({messge:"Saved Bio succesfully",bio});
+                }).catch( (err) =>{
+                    return res.status(500).json({message:"Something went wrong, try again later"});
+                });
             });
         }).catch( (err) =>{
-            return res.json({message:"Something went wrong, try again later"});
+            return res.status(500).json({message:"Something went wrong, try again later"});
         });       
     }).catch( (err) =>{
-        return res.json({message:"Something went wrong, try again later"});
+        return res.status(500).json({message:"Something went wrong, try again later"});
     });
 });
 
 router.post('/portfolio',function(req,res){
-    User.findOne(req.body.id).then( (user) => {
+    User.findById(req.body.id).then( (user) => {
         const portfolio = new Portfolio({
-            user:user.id,
+            user:user._id,
             projectTitle:req.body.projectTitle,
             projectDescription:req.body.description,
             link:req.body.link
         });
-        Bio.findOne({user:user.id}).then( (bio) => {
-            bio.portfolio=portfolio.id;
-            bio.save();
-            return res.json({message:"Succesfully added your portfolio",portfolio});
+        portfolio.save().then( (portfolio) => {
+            Bio.findOne({user:user._id}).then( (bio) => {
+                bio.portfolio=portfolio._id;
+                bio.save().then( (bio) => {
+                    return res.json({message:"Succesfull",portfolio});
+                }).catch( (err) =>{
+                    return res.status(500).json({message:"Something went wrong while saving bio info in portfolio, try again later"});
+                });
+            }).catch( (err) =>{
+                return res.status(500).json({message:"Something went wrong, try again later"});
+            });
         }).catch( (err) =>{
-            return res.json({message:"Something went wrong, try again later"});
+            return res.status(500).json({message:"Something went wrong while saving portfolio, try again later"});
         });
+        
     }).catch( (err) =>{
-        return res.json({message:"Something went wrong, try again later"});
+        return res.status(500).json({message:"Something went wrong, try again later"});
     });
 });
 
 router.post('/edex',function(req,res){
-    console.log(req.body);
     User.findById(req.body.id).then( (user) => {
-        console.log("User is ",JSON.stringify(user));
         const education = new Education({
             user:user._id,
             school:req.body.school,
@@ -228,27 +238,33 @@ router.post('/edex',function(req,res){
             endYear:req.body.endYear,
             cgpa:req.body.cgpa
         });
-        const experience = new Experience({
-            user:user._id,
-            company:req.body.companyName,
-            startDate:req.body.startDate,
-            endDate:req.body.endDate
+        education.save().then( (education) =>{
+            const experience = new Experience({
+                user:user._id,
+                company:req.body.companyName,
+                startDate:req.body.startDate,
+                endDate:req.body.endDate
+            });
+            experience.save().then( (experience) => {
+                const availability = new Availability;
+                
+                    availability.user=user._id;
+                    availability.isAvailable=req.body.availability;
+                    if(req.body.availability!==true)
+                        availabilty.nextAvailable=req.body.nextDate;
+                    availability.save().then((availability)=>{
+                        return res.json({message:"Succesful",education,experience,availability});
+                    }).catch( (err) =>{
+                        return res.status(500).json({message:"Something went wrong, try again later"});
+                    });
+                }).catch( (err) =>{
+                    return res.status(500).json({message:"Something went wrong, try again later"});
+                });
+        }).catch( (err) =>{
+            return res.status(500).json({message:"Something went wrong, try again later"});
         });
-        const availability = new Availability;
-        if(req.body.availability===true){
-            availability.user=user._id;
-            availability.isAvailable=req.body.availability;
-            availability.save();
-        }
-        else{
-            availabilty.user=user._id;
-            availabilty.isAvailable=req.body.availability;
-            availabilty.nextAvailable=req.body.nextDate;
-            availability.save();
-        } 
-        return res.json({message:"Succesful",education,experience,availability});
     }).catch( (err) =>{
-        return res.json({message:"Something went wrong, try again later"});
+        return res.status(500).json({message:"Something went wrong, try again later"});
     });;
 });
 
