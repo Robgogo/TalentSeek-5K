@@ -218,9 +218,9 @@ router.post('/portfolio',function(req,res){
 
 router.post('/edex',function(req,res){
     console.log(req.body);
-    User.findOne(req.body.id).then( (user) => {
+    User.findOne({_id:req.body.id}).then( (user) => {
         const education = new Education({
-            user:user.id,
+            user:user._id,
             school:req.body.school,
             qualification:req.body.qualification,
             startYear:req.body.startYear,
@@ -228,19 +228,19 @@ router.post('/edex',function(req,res){
             cgpa:req.bosy.cgpa
         });
         const experience = new Experience({
-            user:user.id,
+            user:user._id,
             company:req.body.companyName,
             startDate:req.body.startDate,
             endDate:req.body.endDate
         });
         const availability = new Availability;
         if(req.body.availability===true){
-            availability.user=user.id;
+            availability.user=user._id;
             availability.isAvailable=req.body.availability;
             availability.save();
         }
         else{
-            availabilty.user=user.id;
+            availabilty.user=user._id;
             availabilty.isAvailable=req.body.availability;
             availabilty.nextAvailable=req.body.nextDate;
             availability.save();
