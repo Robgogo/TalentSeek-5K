@@ -166,7 +166,7 @@ router.post('/portfolio',function(req,res){
         const portfolio = new Portfolio({
             user:user.id,
             projectTitle:req.body.projectTitle,
-            projectDescription:req.body.projectDescription,
+            projectDescription:req.body.description,
             link:req.body.link
         });
         Bio.findOne({user:user.id}).then( (bio) => {
