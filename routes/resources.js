@@ -174,6 +174,8 @@ router.post('/portfolio',function(req,res){
             bio.save();
             return res.json({message:"Succesfully added your portfolio",portfolio});
         });
+    }).catch( (err) =>{
+        return res.json({message:"Something went wrong, try again later"});
     });
 });
 
@@ -206,7 +208,9 @@ router.post('/edex',function(req,res){
             availability.save();
         } 
         return res.json({message:"Succesfully added Education,Experience and set your availabilty",education,experience,availability});
-    });
+    }).catch( (err) =>{
+        return res.json({message:"Something went wrong, try again later"});
+    });;
 });
 
 // router.post('/experience',function(req,res){
