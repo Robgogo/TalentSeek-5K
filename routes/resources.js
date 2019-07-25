@@ -218,7 +218,8 @@ router.post('/portfolio',function(req,res){
 
 router.post('/edex',function(req,res){
     console.log(req.body);
-    User.findOne({_id:req.body.id}).then( (user) => {
+    User.findById(req.body.id).then( (user) => {
+        console.log("User is ",user);
         const education = new Education({
             user:user._id,
             school:req.body.school,
