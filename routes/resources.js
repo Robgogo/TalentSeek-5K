@@ -219,14 +219,14 @@ router.post('/portfolio',function(req,res){
 router.post('/edex',function(req,res){
     console.log(req.body);
     User.findById(req.body.id).then( (user) => {
-        console.log("User is ",user);
+        console.log("User is ",JSON.stringify(user));
         const education = new Education({
             user:user._id,
             school:req.body.school,
             qualification:req.body.qualification,
             startYear:req.body.startYear,
             endYear:req.body.endYear,
-            cgpa:req.bosy.cgpa
+            cgpa:req.body.cgpa
         });
         const experience = new Experience({
             user:user._id,
