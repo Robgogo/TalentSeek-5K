@@ -133,7 +133,7 @@ router.put('/availability/:id',function(req,res){
 });
 
 router.post('/bio',function(req,res){
-    User.findById(req.body.user.id).then((user)=>{
+    User.findById(req.body.id).then((user)=>{
         let path='';
         upload(req,res,function(err){
             if(err){
@@ -162,7 +162,7 @@ router.post('/bio',function(req,res){
 });
 
 router.post('/portfolio',function(req,res){
-    User.findOne(req.body.user.id).then( (user) => {
+    User.findOne(req.body.id).then( (user) => {
         const portfolio = new Portfolio({
             user:user.id,
             projectTitle:req.body.projectTitle,
@@ -178,7 +178,7 @@ router.post('/portfolio',function(req,res){
 });
 
 router.post('/edex',function(req,res){
-    User.findOne(req.body.user.id).then( (user) => {
+    User.findOne(req.body.id).then( (user) => {
         const education = new Education({
             user:user.id,
             school:req.body.school,
