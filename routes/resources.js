@@ -25,7 +25,11 @@ router.get('/bio/:id',function(req,res){
         Bio.findOne({user:user.id})
         .then((bio)=>{
             return res.json({bio});
+        }).catch( (err) => {
+            return res.json({message:"Could not fetch data, try again later!"});
         });
+    }).catch( (err) => {
+        return res.json({message:"Could not fetch data, try again later!"});
     });
 });
 
@@ -34,36 +38,56 @@ router.get('/portfolio/:id',function(req,res){
         Portfolio.findOne({user:user.id})
         .then((portfolio)=>{
             return res.json({portfolio});
+        }).catch( (err) => {
+            return res.json({message:"Could not fetch data, try again later!"});
         });
+    }).catch( (err) => {
+        return res.json({message:"Could not fetch data, try again later!"});
     });
 });
 
-router.get('/education/:id',function(req,res){
+router.get('/edex/:id',function(req,res){
     User.findById(req.params.id).then((user)=>{
         Education.findOne({user:user.id})
         .then((education)=>{
-            return res.json({education});
+            Experience.findOne({user:user.id})
+            .then((experience)=>{
+                Availability.findOne({user:user.id})
+                .then((availability)=>{
+                    return res.json({education,experience,availability});
+                }).catch( (err) => {
+                    return res.json({message:"Could not fetch data, try again later!"});
+                });
+            }).catch( (err) => {
+                return res.json({message:"Could not fetch data, try again later!"});
+            });
+        }).catch( (err) => {
+            return res.json({message:"Could not fetch data, try again later!"});
         });
+    }).catch( (err) => {
+        return res.json({message:"Could not fetch data, try again later!"});
     });
 });
 
-router.get('/experience/:id',function(req,res){
-    User.findById(req.params.id).then((user)=>{
-        Experience.findOne({user:user.id})
-        .then((experience)=>{
-            return res.json({experience});
-        });
-    });
-});
+// router.get('/experience/:id',function(req,res){
+//     User.findById(req.params.id).then((user)=>{
+//         Experience.findOne({user:user.id})
+//         .then((experience)=>{
+//             return res.json({experience});
+//         });
+//     }).catch( (err) => {
+//         return res.json({message:"Could not fetch data, try again later!"});
+//     });
+// });
 
-router.get('/availability/:id',function(req,res){
-    User.findById(req.params.id).then((user)=>{
-        Availability.findOne({user:user.id})
-        .then((availability)=>{
-            return res.json({availability});
-        });
-    });
-});
+// router.get('/availability/:id',function(req,res){
+//     User.findById(req.params.id).then((user)=>{
+//         Availability.findOne({user:user.id})
+//         .then((availability)=>{
+//             return res.json({availability});
+//         });
+//     });
+// });
 
 router.put('/bio/:id',function(req,res){
     User.findById(req.params.id).then((user)=>{
@@ -76,7 +100,11 @@ router.put('/bio/:id',function(req,res){
             bio.skill=skl;
             bio.save();
             return res.json({bio});
+        }).catch( (err) => {
+            return res.json({message:"Could not fetch data, try again later!"});
         });
+    }).catch( (err) => {
+        return res.json({message:"Could not fetch data, try again later!"});
     });
 });
 
@@ -137,7 +165,7 @@ router.post('/bio',function(req,res){
         let path='';
         upload(req,res,function(err){
             if(err){
-                return res.status(422).jsom({messge:"an Error occured while uploading"});
+                return res.status(422).json({messge:"an Error occured while uploading"});
             }
             Path=req.file.path;
             const profile = new Profile;
@@ -145,6 +173,9 @@ router.post('/bio',function(req,res){
             profile.img.contentType = 'image/jpeg';
             profile.user=user.id;
             profile.save(function(err,profile){
+                if(err){
+                    return res.json({message:"Something went wrong while saving to database, try again later"}); 
+                }
                 let skl=[...bio.skill];
                 for(i=0;i<req.body.skill.length();i++)
                     skl.push(req.body.skill[i]);
@@ -157,7 +188,11 @@ router.post('/bio',function(req,res){
                 });
                 return res.json({messge:"Saved Bio succesfully",newBio}); 
             });
+        }).catch( (err) =>{
+            return res.json({message:"Something went wrong, try again later"});
         });       
+    }).catch( (err) =>{
+        return res.json({message:"Something went wrong, try again later"});
     });
 });
 
@@ -182,6 +217,7 @@ router.post('/portfolio',function(req,res){
 });
 
 router.post('/edex',function(req,res){
+    console.log(req.body);
     User.findOne(req.body.id).then( (user) => {
         const education = new Education({
             user:user.id,
@@ -209,7 +245,7 @@ router.post('/edex',function(req,res){
             availabilty.nextAvailable=req.body.nextDate;
             availability.save();
         } 
-        return res.json({message:"Succesfully added Education,Experience and set your availabilty",education,experience,availability});
+        return res.json({message:"Succesful",education,experience,availability});
     }).catch( (err) =>{
         return res.json({message:"Something went wrong, try again later"});
     });;
