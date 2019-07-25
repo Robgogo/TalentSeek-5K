@@ -173,6 +173,8 @@ router.post('/portfolio',function(req,res){
             bio.portfolio=portfolio.id;
             bio.save();
             return res.json({message:"Succesfully added your portfolio",portfolio});
+        }).catch( (err) =>{
+            return res.json({message:"Something went wrong, try again later"});
         });
     }).catch( (err) =>{
         return res.json({message:"Something went wrong, try again later"});
