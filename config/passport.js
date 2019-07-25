@@ -19,7 +19,14 @@ passport.use(new LocalStrategy({
                 throw err;
             }
             if(isaMatch){
-                return done(null,{user});
+                let firstTime=false;
+                if(user.isFirstTime===true){
+                    firstTime=user.isFirstTime;
+                    user.isFirstTime=false;
+                    user.save();
+                }
+                
+                return done(null,{user,firstTime});
             }
             else{
                 return done(null,false,{message:"Incorrect username or password"});

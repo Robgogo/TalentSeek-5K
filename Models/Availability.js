@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const availabilitySchema=new Schema({
     user:{type: Schema.Types.ObjectId,ref:'User', required:true},
     isAvailable:{type:Boolean,required:true},
-    nextAvailable:{type:Date}
+    nextAvailable:{type:Date,default:null}
 });
 
 const Availabilty=mongoose.model('Availabilty',availabilitySchema);
