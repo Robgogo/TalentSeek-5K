@@ -65,8 +65,12 @@ router.post('/login',function(req,res,next){
       }
 
       const token=jwt.sign(user,constants.SECRET_KEY);
-      user.token=token;
-      user.save();
+      const newUser=new User;
+      newUser=user;
+      newUser.token=token;
+      console.log("User is: ",newUser);
+      newUser.save();
+
       return res.json({user,token,isFirstTime:user.firstTime});
     });
   })(req,res);
