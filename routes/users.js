@@ -65,6 +65,8 @@ router.post('/login',function(req,res,next){
       }
 
       const token=jwt.sign(user,constants.SECRET_KEY);
+      user.token=token;
+      user.save();
       return res.json({user,token,isFirstTime:user.firstTime});
     });
   })(req,res);

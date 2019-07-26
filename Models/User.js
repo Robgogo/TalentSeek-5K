@@ -9,7 +9,7 @@ const userSchema = new Schema({
   isTalent:{ type: Boolean, required: true, required:true},
   dateOfBirth: { type: Date, default: null},
   isFirstTime:{type:Boolean, default:true},
-  token:{type:String}
+  token:{type:String,default:null}
 });
 
 const User = mongoose.model('Users', userSchema);
