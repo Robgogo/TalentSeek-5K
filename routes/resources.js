@@ -40,6 +40,7 @@ router.get('/bio/:id',function(req,res){
 });
 
 router.get('/portfolio/:id',function(req,res){
+    console.log("id is ",req.params.id);
     User.findById(req.params.id).then((user)=>{
         Portfolio.find({user:user._id})
         .then((portfolio)=>{
