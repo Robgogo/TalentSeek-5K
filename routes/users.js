@@ -65,7 +65,7 @@ router.post('/login',function(req,res,next){
       }
 
       const token=jwt.sign(user,constants.SECRET_KEY);
-      const newUser=new User;
+      let newUser=new User;
       newUser=user;
       newUser.token=token;
       console.log("User is: ",newUser);
