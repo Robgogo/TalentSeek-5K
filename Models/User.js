@@ -8,8 +8,7 @@ const userSchema = new Schema({
   password: {type:String, required: true} ,
   isTalent:{ type: Boolean, required: true, required:true},
   dateOfBirth: { type: Date, default: null},
-  isFirstTime:{type:Boolean, default:true},
-  token:{type:String,default:null}
+  isFirstTime:{type:Boolean, default:true}
 });
 
 const User = mongoose.model('Users', userSchema);
