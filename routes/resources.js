@@ -141,7 +141,7 @@ router.post('/portfolio/:id/:prtId',function(req,res){
     });
 });
 
-router.post('/education/:id',function(req,res){
+router.put('/education/:id',function(req,res){
     User.findById(req.params.id).then((user)=>{
         Education.findOne({user:user.id})
         .then((education)=>{
@@ -155,7 +155,7 @@ router.post('/education/:id',function(req,res){
     });
 });
 
-router.post('/experience/:id',function(req,res){
+router.put('/experience/:id',function(req,res){
     User.findById(req.params.id).then((user)=>{
         Experience.findOne({user:user.id})
         .then((experience)=>{
@@ -168,7 +168,7 @@ router.post('/experience/:id',function(req,res){
     });
 });
 
-router.post('/availability/:id',function(req,res){
+router.put('/availability/:id',function(req,res){
     User.findById(req.params.id).then((user)=>{
         Availability.findOne({user:user.id})
         .then((availability)=>{
@@ -223,7 +223,7 @@ router.post('/bio',function(req,res){
 });
 
 router.post('/portfolio',function(req,res){
-    User.findOne({token:req.body.token}).then( (user) => {
+    User.findById(req.body.id).then( (user) => {
         const portfolio = new Portfolio({
             user:user._id,
             projectTitle:req.body.projectTitle,
@@ -254,7 +254,7 @@ router.post('/portfolio',function(req,res){
 });
 
 router.post('/edex',function(req,res){
-    User.findOne({token:req.body.token}).then( (user) => {
+    User.findById(req.body.id).then( (user) => {
         const education = new Education({
             user:user._id,
             school:req.body.school,
