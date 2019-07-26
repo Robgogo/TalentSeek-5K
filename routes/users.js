@@ -65,12 +65,11 @@ router.post('/login',function(req,res,next){
       }
 
       const token=jwt.sign(user,constants.SECRET_KEY);
-      let newUser=new User;
-      newUser=user;
-      newUser.token=token;
-      console.log("User is: ",newUser);
-      newUser.save();
 
+      User.findById(user._id).then( (user) => {
+        user.token=token;
+        user.save();
+      });
       return res.json({user,token,isFirstTime:user.firstTime});
     });
   })(req,res);
