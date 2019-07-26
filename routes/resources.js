@@ -129,55 +129,57 @@ router.post('/bio/:id/:bioId',function(req,res){
     });
 });
 
-router.post('/portfolio/:id/:prtId',function(req,res){
-    User.findById(req.params.id).then((user)=>{
-        Portfolio.findOne({user:user._id,_id:req.params.prtId})
-        .then((portfolio)=>{
-            portfolio.projectTitle=req.body.projectTitle;
-            portfolio.projectDescription=req.body.description;
-            portfolio.link=req.body.link;
-            portfolio.save();
-            return res.json({portfolio});
-        });
+router.post('/portfolio/edit',function(req,res){
+    Portfolio.findById(req.body.id)
+    .then((portfolio)=>{
+        if(!portfolio){
+            return res.status(400).json({message:"Couold not find portfolio, try again later"});
+        }
+        portfolio.projectTitle=req.body.projectTitle;
+        portfolio.projectDescription=req.body.description;
+        portfolio.link=req.body.link;
+        portfolio.save();
+        return res.json({portfolio});
     });
 });
 
-router.put('/education/:id',function(req,res){
-    User.findById(req.params.id).then((user)=>{
-        Education.findOne({user:user.id})
-        .then((education)=>{
-            education.school=req.body.school;
-            education.startYear=req.body.startYear;
-            education.endYear=req.body.endYear;
-            education.qualification=req.body.qualification;
-            education.save();
-            return res.json({education});
-        });
+router.post('/education/edit',function(req,res){
+    Education.findById(req.body.id).then((education)=>{
+        if(!education){
+            return res.status(400).json({message:"Couold not find education entry, try again later"});
+        }
+        education.school=req.body.school;
+        education.startYear=req.body.startYear;
+        education.endYear=req.body.endYear;
+        education.qualification=req.body.qualification;
+        education.save();
+        return res.json({education});
     });
 });
 
-router.put('/experience/:id',function(req,res){
-    User.findById(req.params.id).then((user)=>{
-        Experience.findOne({user:user.id})
-        .then((experience)=>{
-            experience.company=req.body.company;
-            experience.startDate=req.body.startDate;
-            experience.endDate=req.body.endDate;
-            experience.save();
-            return res.json({experience});
-        });
+router.post('/experience/edit',function(req,res){
+    Experience.findById(req.body.id).then((experience)=>{
+        if(!experience){
+            return res.status(400).json({message:"Couold not find experience entry, try again later"});
+        }
+        experience.company=req.body.company;
+        experience.startDate=req.body.startDate;
+        experience.endDate=req.body.endDate;
+        experience.save();
+        return res.json({experience});
     });
 });
 
-router.put('/availability/:id',function(req,res){
-    User.findById(req.params.id).then((user)=>{
-        Availability.findOne({user:user.id})
-        .then((availability)=>{
-            availability.isAvailable=req.body.isAvailable;
-            availability.nextAvailable=req.body.nextAvailable;
-            availability.save();
-            return res.json({availidability});
-        });
+router.post('/availability/edit',function(req,res){
+    Availability.findById(req.body.id)
+    .then((availability)=>{
+        if(!availability){
+            return res.status(400).json({message:"Couold not find availability entry, try again later"});
+        }
+        availability.isAvailable=req.body.isAvailable;
+        availability.nextAvailable=req.body.nextAvailable;
+        availability.save();
+        return res.json({availidability});
     });
 });
 
