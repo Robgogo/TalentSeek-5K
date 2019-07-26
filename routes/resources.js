@@ -223,7 +223,7 @@ router.post('/bio',function(req,res){
 });
 
 router.post('/portfolio',function(req,res){
-    User.findById(req.body.id).then( (user) => {
+    User.findOne({token:req.body.token}).then( (user) => {
         const portfolio = new Portfolio({
             user:user._id,
             projectTitle:req.body.projectTitle,
@@ -254,7 +254,7 @@ router.post('/portfolio',function(req,res){
 });
 
 router.post('/edex',function(req,res){
-    User.findById(req.body.id).then( (user) => {
+    User.findOne({token:req.body.token}).then( (user) => {
         const education = new Education({
             user:user._id,
             school:req.body.school,
