@@ -22,50 +22,68 @@ const upload = multer({ storage: storage }).single('photo');
 
 router.get('/bio/:id',function(req,res){
     User.findById(req.params.id).then((user)=>{
-        Bio.findOne({user:user.id})
+        if(!user){
+            return res.status(500).json({message:"no Data for this user!",data:null});
+        }
+        Bio.find({user:user._id})
         .then((bio)=>{
+            if(!bio){
+                return res.status(500).json({message:"Could not fetch data, try again later!",data:null});
+            }
             return res.json({bio});
         }).catch( (err) => {
-            return res.json({message:"Could not fetch data, try again later!"});
+            return res.status(500).json({message:"Could not fetch data, try again later!",data:null});
         });
     }).catch( (err) => {
-        return res.json({message:"Could not fetch data, try again later!"});
+        return res.status(500).json({message:"Could not fetch data, try again later!",data:null});
     });
 });
 
 router.get('/portfolio/:id',function(req,res){
     User.findById(req.params.id).then((user)=>{
-        Portfolio.findOne({user:user.id})
+        Portfolio.find({user:user._id})
         .then((portfolio)=>{
+            if(!portfolio){
+                return res.status(500).json({message:"Could not fetch data, try again later!",data:null});
+            }
             return res.json({portfolio});
         }).catch( (err) => {
-            return res.json({message:"Could not fetch data, try again later!"});
+            return res.status(500).json({message:"Could not fetch data, try again later!"});
         });
     }).catch( (err) => {
-        return res.json({message:"Could not fetch data, try again later!"});
+        return res.status(500).json({message:"Could not fetch data, try again later!"});
     });
 });
 
 router.get('/edex/:id',function(req,res){
     User.findById(req.params.id).then((user)=>{
-        Education.findOne({user:user.id})
+        Education.find({user:user._id})
         .then((education)=>{
-            Experience.findOne({user:user.id})
+            if(!education){
+                return res.status(500).json({message:"Could not fetch data, try again later!"});
+            }
+            Experience.find({user:user._id})
             .then((experience)=>{
-                Availability.findOne({user:user.id})
+                if(!experience){
+                    return res.status(500).json({message:"Could not fetch data, try again later!"});
+                }
+                Availability.find({user:user._id})
                 .then((availability)=>{
+                    if(!availability){
+                        return res.status(500).json({message:"Could not fetch data, try again later!"});
+                    }
                     return res.json({education,experience,availability});
                 }).catch( (err) => {
-                    return res.json({message:"Could not fetch data, try again later!"});
+                    return res.status(500).json({message:"Could not fetch data, try again later!"});
                 });
             }).catch( (err) => {
-                return res.json({message:"Could not fetch data, try again later!"});
+                return res.status(500).json({message:"Could not fetch data, try again later!"});
             });
         }).catch( (err) => {
-            return res.json({message:"Could not fetch data, try again later!"});
+            return res.status(500).json({message:"Could not fetch data, try again later!"});
         });
     }).catch( (err) => {
-        return res.json({message:"Could not fetch data, try again later!"});
+        return res.status(500).json({message:"Could not fetch data, try again later!"});
     });
 });
 
@@ -89,9 +107,11 @@ router.get('/edex/:id',function(req,res){
 //     });
 // });
 
-router.put('/bio/:id',function(req,res){
+//Update request for resources
+
+router.post('/bio/:id/:bioId',function(req,res){
     User.findById(req.params.id).then((user)=>{
-        Bio.findOne({user:user.id})
+        Bio.findOne({user:user._id,_id:req.params.bioId})
         .then((bio)=>{
             bio.interest=req.body.interest;
             let skl=[...bio.skill];
@@ -108,9 +128,9 @@ router.put('/bio/:id',function(req,res){
     });
 });
 
-router.put('/portfolio/:id',function(req,res){
+router.post('/portfolio/:id/:prtId',function(req,res){
     User.findById(req.params.id).then((user)=>{
-        Portfolio.findOne({user:user.id})
+        Portfolio.findOne({user:user._id,_id:req.params.prtId})
         .then((portfolio)=>{
             portfolio.projectTitle=req.body.projectTitle;
             portfolio.projectDescription=req.body.description;
@@ -121,7 +141,7 @@ router.put('/portfolio/:id',function(req,res){
     });
 });
 
-router.put('/education/:id',function(req,res){
+router.post('/education/:id',function(req,res){
     User.findById(req.params.id).then((user)=>{
         Education.findOne({user:user.id})
         .then((education)=>{
@@ -135,7 +155,7 @@ router.put('/education/:id',function(req,res){
     });
 });
 
-router.put('/experience/:id',function(req,res){
+router.post('/experience/:id',function(req,res){
     User.findById(req.params.id).then((user)=>{
         Experience.findOne({user:user.id})
         .then((experience)=>{
@@ -148,7 +168,7 @@ router.put('/experience/:id',function(req,res){
     });
 });
 
-router.put('/availability/:id',function(req,res){
+router.post('/availability/:id',function(req,res){
     User.findById(req.params.id).then((user)=>{
         Availability.findOne({user:user.id})
         .then((availability)=>{
@@ -159,6 +179,8 @@ router.put('/availability/:id',function(req,res){
         });
     });
 });
+
+//Create request of resources
 
 router.post('/bio',function(req,res){
     User.findById(req.body.id).then((user)=>{
@@ -210,6 +232,9 @@ router.post('/portfolio',function(req,res){
         });
         portfolio.save().then( (portfolio) => {
             Bio.findOne({user:user._id}).then( (bio) => {
+                if(!bio){
+                    return res.status(400).json({message:"could not find bio for the user!"});
+                }
                 bio.portfolio=portfolio._id;
                 bio.save().then( (bio) => {
                     return res.json({message:"Succesfull",portfolio});
@@ -248,15 +273,15 @@ router.post('/edex',function(req,res){
             experience.save().then( (experience) => {
                 const availability = new Availability;
                 
-                    availability.user=user._id;
-                    availability.isAvailable=req.body.availability;
-                    if(req.body.availability!==true)
-                        availabilty.nextAvailable=req.body.nextDate;
-                    availability.save().then((availability)=>{
-                        return res.json({message:"Succesful",education,experience,availability});
-                    }).catch( (err) =>{
-                        return res.status(500).json({message:"Something went wrong, try again later"});
-                    });
+                availability.user=user._id;
+                availability.isAvailable=req.body.availability;
+                if(req.body.availability!==true)
+                    availabilty.nextAvailable=req.body.nextDate;
+                availability.save().then((availability)=>{
+                    return res.json({message:"Succesful",education,experience,availability});
+                }).catch( (err) =>{
+                    return res.status(500).json({message:"Something went wrong, try again later"});
+                });
                 }).catch( (err) =>{
                     return res.status(500).json({message:"Something went wrong, try again later"});
                 });
