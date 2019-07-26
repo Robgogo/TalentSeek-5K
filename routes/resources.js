@@ -232,19 +232,7 @@ router.post('/portfolio',function(req,res){
             link:req.body.link
         });
         portfolio.save().then( (portfolio) => {
-            Bio.findOne({user:user._id}).then( (bio) => {
-                if(!bio){
-                    return res.status(400).json({message:"could not find bio for the user!"});
-                }
-                bio.portfolio=portfolio._id;
-                bio.save().then( (bio) => {
-                    return res.json({message:"Succesfull",portfolio});
-                }).catch( (err) =>{
-                    return res.status(500).json({message:"Something went wrong while saving bio info in portfolio, try again later"});
-                });
-            }).catch( (err) =>{
-                return res.status(500).json({message:"Something went wrong, try again later"});
-            });
+            return res.json({message:"Succesfull",portfolio});      
         }).catch( (err) =>{
             return res.status(500).json({message:"Something went wrong while saving portfolio, try again later"});
         });
