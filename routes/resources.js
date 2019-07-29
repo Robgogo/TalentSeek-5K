@@ -130,17 +130,102 @@ router.post('/bio/:id/:bioId',function(req,res){
 });
 
 router.post('/portfolio/edit',function(req,res){
-    Portfolio.findById(req.body.id)
-    .then((portfolio)=>{
+    Portfolio.findById(req.body.id).then((portfolio)=>{
         if(!portfolio){
             return res.status(400).json({message:"Couold not find portfolio, try again later"});
         }
         portfolio.projectTitle=req.body.projectTitle;
         portfolio.projectDescription=req.body.description;
         portfolio.link=req.body.link;
-        portfolio.save();
-        return res.json({portfolio});
+        portfolio.save().then( portfolio => {
+            return res.json({portfolio});
+        });
     });
+});
+
+router.post('/edex/edit',function(req,res){
+    if(req.body.isEducation && !req.body.isExperience && !req.body.isAvailablity){
+        Education.findById(req.body.educationId).then((education)=>{
+            if(!education){
+                return res.status(400).json({message:"Couold not find education entry, try again later"});
+            }
+            education.school=req.body.school;
+            education.startYear=req.body.startYear;
+            education.endYear=req.body.endYear;
+            education.qualification=req.body.qualification;
+            education.save().then( education => {
+                return res.json({education});
+            });
+        });
+    }
+    if(!req.body.isEducation && req.body.isExperience && !req.body.isAvailablity){
+        Experience.findById(req.body.experienceId).then((experience)=>{
+            if(!experience){
+                return res.status(400).json({message:"Couold not find experience entry, try again later"});
+            }
+            experience.company=req.body.company;
+            experience.startDate=req.body.startDate;
+            experience.endDate=req.body.endDate;
+            experience.save().then( experience => {
+                return res.json({experience});
+            });
+        });
+    }
+    if(!req.body.isEducation && !req.body.isExperience && req.body.isAvailablity){
+        Availability.findById(req.body.availabilityId).then((availability)=>{
+            if(!availability){
+                return res.status(400).json({message:"Couold not find availability entry, try again later"});
+            }
+            availability.isAvailable=req.body.isAvailable;
+            availability.nextAvailable=req.body.nextAvailable;
+            availability.save().then( availability => {
+                return res.json({availability});
+            }); 
+        });
+    }
+    if(req.body.isEducation && req.body.isExperience && req.body.isAvailablity){
+        Education.findById(req.body.educationId).then((education)=>{
+            if(!education){
+                return res.status(400).json({message:"Couold not find education entry, try again later"});
+            }
+            education.school=req.body.school;
+            education.startYear=req.body.startYear;
+            education.endYear=req.body.endYear;
+            education.qualification=req.body.qualification;
+            education.save().then( (education) => {
+                Experience.findById(req.body.experienceId).then((experience)=>{
+                    if(!experience){
+                        return res.status(400).json({message:"Couold not find experience entry, try again later"});
+                    }
+                    experience.company=req.body.company;
+                    experience.startDate=req.body.startDate;
+                    experience.endDate=req.body.endDate;
+                    experience.save().then( (experience) => {
+                        Availability.findById(req.body.availabilityId).then((availability)=>{
+                            if(!availability){
+                                return res.status(400).json({message:"Couold not find availability entry, try again later"});
+                            }
+                            availability.isAvailable=req.body.isAvailable;
+                            availability.nextAvailable=req.body.nextAvailable;
+                            availability.save().then( (availability) => {
+                                return res.json({education,experience,availability});
+                            }).catch( err => {
+                                return res.status(500).json({message:"Could not Update!"});
+                            });
+                        }).catch( err => {
+                            return res.status(500).json({message:"Could not Update!"});
+                        });
+                    }).catch( err => {
+                        return res.status(500).json({message:"Could not Update!"});
+                    });
+                }).catch( err => {
+                    return res.status(500).json({message:"Could not Update!"});
+                });
+            }).catch( err => {
+                return res.status(500).json({message:"Could not Update!"});
+            });
+        });
+    }
 });
 
 router.post('/education/edit',function(req,res){
@@ -152,8 +237,9 @@ router.post('/education/edit',function(req,res){
         education.startYear=req.body.startYear;
         education.endYear=req.body.endYear;
         education.qualification=req.body.qualification;
-        education.save();
-        return res.json({education});
+        education.save().then( education => {
+            return res.json({education});
+        });
     });
 });
 
@@ -165,8 +251,9 @@ router.post('/experience/edit',function(req,res){
         experience.company=req.body.company;
         experience.startDate=req.body.startDate;
         experience.endDate=req.body.endDate;
-        experience.save();
-        return res.json({experience});
+        experience.save().then( experience => {
+            return res.json({experience});
+        });
     });
 });
 
@@ -178,8 +265,71 @@ router.post('/availability/edit',function(req,res){
         }
         availability.isAvailable=req.body.isAvailable;
         availability.nextAvailable=req.body.nextAvailable;
-        availability.save();
-        return res.json({availidability});
+        availability.save().then( availability => {
+            return res.json({availability});
+        });
+    });
+});
+
+//Delete request for resources
+
+router.post('/portfolio/delete',function(req,res){
+    Portfolio.findByIdAndDelete(req.body.id)
+    .then((portfolio)=>{
+        if(!portfolio){
+            return res.status(400).json({message:"Couold not find portfolio, try again later"});
+        }
+        return res.json({message:"Successful",portfolio});
+    });
+});
+
+router.post('/edex/delete',function(req,res){
+    if(req.body.isEducation && !req.body.isExperience){
+        Education.findByIdAndDelete(req.body.id).then((education)=>{
+            if(!education){
+                return res.status(400).json({message:"Couold not find education entry, try again later"});
+            }
+            return res.json({message:"Successful",education});
+        });
+    }
+    if(!req.body.isEducation && req.body.isExperience){
+        Experience.findByIdAndDelete(req.body.id).then((experience)=>{
+            if(!experience){
+                return res.status(400).json({message:"Couold not find experience entry, try again later"});
+            }
+            return res.json({message:"Successful",experience});
+        });
+    }
+    if(req.body.isEducation && req.body.isExperience){
+        Education.findByIdAndDelete(req.body.educationId).then((education)=>{
+            if(!education){
+                return res.status(400).json({message:"Couold not find education entry, try again later"});
+            }
+            Experience.findByIdAndDelete(req.body.id).then((experience)=>{
+                if(!experience){
+                    return res.status(400).json({message:"Couold not find experience entry, try again later"});
+                }
+                return res.json({message:"Successful",education,experience}); 
+            });
+        });
+    }
+});
+
+router.post('/education/delete',function(req,res){
+    Education.findByIdAndDelete(req.body.id).then((education)=>{
+        if(!education){
+            return res.status(400).json({message:"Couold not find education entry, try again later"});
+        }
+        return res.json({message:"Successful",education});
+    });
+});
+
+router.post('/experience/delete',function(req,res){
+    Experience.findByIdAndDelete(req.body.id).then((experience)=>{
+        if(!experience){
+            return res.status(400).json({message:"Couold not find experience entry, try again later"});
+        }
+        return res.json({message:"Successful",experience});
     });
 });
 
