@@ -3,8 +3,7 @@ const Schema = mongoose.Schema;
 
 const skillSchema=new Schema({
     skill:{type:String,required:true,trim:true},
-    level:{type:String,required:true},
-    yearOfExp:{type:Number}
+    yearOfExp:{type:Number,default:1}
 });
 
 const Skill=mongoose.model('Skills',skillSchema);

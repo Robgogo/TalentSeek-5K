@@ -45,7 +45,7 @@ router.post('/signup', (req, res) => {
         newUser.password = hash;
 
         newUser.save().then(user => {
-          return res.json({ message: "registration succesfull", isAuthenticated: true, user: user });
+          return res.json({ message: "Successful", isAuthenticated: true, user: user });
         });
       });
     });
@@ -68,7 +68,7 @@ router.post('/login', function (req, res, next) {
       }
 
       const token = jwt.sign(user, constants.SECRET_KEY);
-      return res.json({ user, token, isFirstTime: user.firstTime });
+      return res.json({ message: "Successful", user, token, isFirstTime: user.firstTime });
     });
   })(req, res);
   // res.status(200);
@@ -79,27 +79,31 @@ router.get('/profile/:id', function (req, res) {
   User.findById(req.params.id).then(user => {
     if (!user) {
       return res.status(400).json({ message: "User not found" });
-    } Portfolio.find({ user: user._id }).then(portfolio => {
+    } 
+    if (!user.isTalent) {
+      return res.status(400).json({ message: "User is not talent" });
+    }
+    Portfolio.find({ user: user._id }).then(portfolio => {
       Experience.find({ user: user._id }).then(experience => {
         Education.find({ user: user._id }).then(education => {
           Availability.find({ user: user._id }).then(availabilty => {
-            return res.json({ portfolio, education, experience, availabilty });
+            Bio.find({user:user._id}).then( bio => {
+              return res.json({ message:"Successful", portfolio, education, experience, availabilty, bio });
+            }).catch(err => {
+              return res.status(500).json({ message: "Could not find bio for user" });
+            });
           }).catch(err => {
-            return res.status(500).json({ message: "Could not find portfolio for user" });
+            return res.status(500).json({ message: "Could not find availabilty for user" });
           });
         }).catch(err => {
-          return res.status(500).json({ message: "Could not find portfolio for user" });
+          return res.status(500).json({ message: "Could not find education for user" });
         });
       }).catch(err => {
-        return res.status(500).json({ message: "Could not find portfolio for user" });
+        return res.status(500).json({ message: "Could not find experience for user" });
       });
     }).catch(err => {
       return res.status(500).json({ message: "Could not find portfolio for user" });
     });
-    if (!user.isTalent) {
-      return res.status(400).json({ message: "User is not talent" });
-    }
-
   }).catch(err => {
     return res.status(400).json({ message: "Error" });
   });
@@ -121,7 +125,7 @@ router.get('/review/:id', function (req, res) {
       for (var i = 0; i < review.length(); i++) {
         avgRating += (review[i].review / 3);
       }
-      return res.json({ review, averageRating: avgRating })
+      return res.json({ message: "Successful", review, averageRating: avgRating })
     }).catch(err => {
       return res.status(500).json({ message: "Error" });
     });
@@ -241,31 +245,42 @@ router.post('/message', function (req, res) {
 router.get('/latest', function (req, res) {
   let result = [];
   User.find().then(users => {
-    for (var i = 0; i < 7; i++) {
-      Portfolio.find({ user: users[users.length() - 1 - i]._id }).then(portfolio => {
-        Experience.find({ user: users[users.length() - 1 - i]._id }).then(experience => {
-          Education.find({ user: users[users.length() - 1 - i]._id }).then(education => {
-            Availability.find({ user: users[users.length() - 1 - i]._id }).then(availabilty => {
-              let newObj = {
-                user: users[users.length() - 1 - i],
-                portfolio: portfolio,
-                experience: experience,
-                education: education,
-                availabilty: availabilty
-              };
-              result.push(newObj);
+    let count=0;
+    let i=users.length()-1;
+    while(count <7){
+      if(users[i].isTalent){
+        Portfolio.find({ user: users[i]._id }).then(portfolio => {
+          Experience.find({ user: users[i]._id }).then(experience => {
+            Education.find({ user: users[i]._id }).then(education => {
+              Availability.find({ user: users[i]._id }).then(availabilty => {
+                Bio.find({user:users[i]._id}).then( bio => {
+                  let newObj = {
+                    user: users[i],
+                    portfolio: portfolio,
+                    experience: experience,
+                    education: education,
+                    availabilty: availabilty,
+                    bio:bio
+                  };
+                  result.push(newObj);
+                  i-=1;
+                  count+=1;
+                }).catch(err => {
+                  return res.status(500).json({ message: "Could not find Availability for user" });
+                });
+              }).catch(err => {
+                return res.status(500).json({ message: "Could not find Availability for user" });
+              });
             }).catch(err => {
-              return res.status(500).json({ message: "Could not find Availability for user" });
+              return res.status(500).json({ message: "Could not find Education for user" });
             });
           }).catch(err => {
-            return res.status(500).json({ message: "Could not find Education for user" });
+            return res.status(500).json({ message: "Could not find Experience for user" });
           });
         }).catch(err => {
-          return res.status(500).json({ message: "Could not find Experience for user" });
+          return res.status(500).json({ message: "Could not find portfolio for user" });
         });
-      }).catch(err => {
-        return res.status(500).json({ message: "Could not find portfolio for user" });
-      });
+      }
     }
     return res.json({ message: "Successful", result });
   });
@@ -281,14 +296,19 @@ router.post('/search', function (req, res) {
             Experience.find({ user: users[i]._id }).then(experience => {
               Education.find({ user: users[i]._id }).then(education => {
                 Availability.find({ user: users[i]._id }).then(availabilty => {
-                  let newObj = {
-                    user: users[i],
-                    portfolio: portfolio,
-                    experience: experience,
-                    education: education,
-                    availabilty: availabilty
-                  };
-                  result.push(newObj);
+                  Bio.find({user:user._id}).then( bio => {
+                    let newObj = {
+                      user: users[i],
+                      portfolio: portfolio,
+                      experience: experience,
+                      education: education,
+                      availabilty: availabilty,
+                      bio:bio
+                    };
+                    result.push(newObj);
+                  }).catch(err => {
+                    return res.status(500).json({ message: "Could not find Availability for user" });
+                  });
                 }).catch(err => {
                   return res.status(500).json({ message: "Could not find Availability for user" });
                 });
@@ -315,14 +335,18 @@ router.post('/search', function (req, res) {
             Experience.find({ user: users[i]._id }).then(experience => {
               Education.find({ user: users[i]._id }).then(education => {
                 Availability.find({ user: users[i]._id }).then(availabilty => {
-                  let newObj = {
-                    user: users[i],
-                    portfolio: portfolio,
-                    experience: experience,
-                    education: education,
-                    availabilty: availabilty
-                  };
-                  temp.push(newObj);
+                  Bio.find({user:users[i]._id}).then( bio => {
+                    let newObj = {
+                      user: users[i],
+                      portfolio: portfolio,
+                      experience: experience,
+                      education: education,
+                      availabilty: availabilty
+                    };
+                    temp.push(newObj);
+                  }).catch(err => {
+                    return res.status(500).json({ message: "Could not find Availability for user" });
+                  });
                 }).catch(err => {
                   return res.status(500).json({ message: "Could not find Availability for user" });
                 });
